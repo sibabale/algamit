@@ -1,3 +1,20 @@
 **/node_modules/
 .DS_Store
 **/.env
+service-account.json
+cloud-sql-proxy
+# IDE - JetBrains
+.idea/
+*.iml
+*.iws
+*.ipr
+*.log
+*.log.*
+*.log.*.*
+*.log.*.*.*
+*.log.*.*.*.*
+# Router
+router/.env
+router/node_modules/
+router/.cache/
+router/router

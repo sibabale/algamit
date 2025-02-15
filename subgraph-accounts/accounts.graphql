@@ -1,0 +1,54 @@
+extend schema
+  @link(url: "https://specs.apollo.dev/federation/v2.7",
+        import: ["@key"])
+
+type Query {
+  "Get all accounts for a user"
+  accounts: [Account!]!
+  "Get a specific account by ID"
+  account(id: ID!): Account
+}
+
+type Account @key(fields: "id") {
+  id: ID!
+  "Owner of the account"
+  owner: User!
+  "Account status"
+  status: AccountStatus!
+  "Owner ID of the account"
+  ownerId: ID!
+  "Current balance in the account"
+  balance: Float!
+  "The date the account was opened"
+  dateOpened: String!
+  "The type of account (e.g., Savings, Current, Fixed Deposit)"
+  accountType: AccountType!
+  "The account number"
+  accountNumber: String!
+  "Transactions associated with this account"
+  transactions: [Transaction]
+}
+
+"Types of bank accounts available"
+enum AccountType {
+  SAVINGS
+  CURRENT
+  FIXED_DEPOSIT
+}
+
+"Possible status values for an account"
+enum AccountStatus {
+  ACTIVE
+  FROZEN
+  CLOSED
+  INACTIVE
+}
+
+# Add reference types
+type User @key(fields: "id") {
+  id: ID!
+}
+
+type Transaction @key(fields: "id", resolvable: false) {
+  id: ID!
+}

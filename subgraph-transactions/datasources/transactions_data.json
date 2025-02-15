@@ -1,0 +1,72 @@
+{
+    "transactions": [
+        {
+            "id": "txn-1",
+            "userId": "usr-1",
+            "accountId": "acc-1",
+            "type": "DEPOSIT",
+            "amount": 5000.00,
+            "category": "SAVINGS",
+            "description": "Initial savings deposit",
+            "createdAt": "2024-03-14T10:00:00Z",
+            "balanceAfter": 5000.00
+        },
+        {
+            "id": "txn-2",
+            "userId": "usr-2",
+            "accountId": "acc-3",
+            "type": "DEPOSIT", 
+            "amount": 10000.00,
+            "category": "FIXED_DEPOSIT",
+            "description": "6-month fixed deposit",
+            "createdAt": "2024-03-01T14:30:00Z",
+            "withdrawalDate": "2024-09-01T14:30:00Z",
+            "balanceAfter": 10000.00
+        },
+        {
+            "id": "txn-3",
+            "userId": "usr-1",
+            "accountId": "acc-1",
+            "type": "WITHDRAWAL",
+            "amount": 1000.00,
+            "category": "GENERAL",
+            "description": "ATM withdrawal",
+            "createdAt": "2024-03-15T16:45:00Z",
+            "balanceAfter": 4000.00
+        },
+        {
+            "id": "txn-4",
+            "userId": "usr-2",
+            "accountId": "acc-3",
+            "type": "DEPOSIT",
+            "amount": 25000.00,
+            "category": "FIXED_DEPOSIT",
+            "description": "12-month fixed deposit",
+            "createdAt": "2024-02-15T09:20:00Z",
+            "withdrawalDate": "2025-02-15T09:20:00Z",
+            "balanceAfter": 35000.00
+        },
+        {
+            "id": "txn-5",
+            "userId": "usr-3",
+            "accountId": "acc-2",
+            "type": "DEPOSIT",
+            "amount": 3000.00,
+            "category": "SAVINGS",
+            "description": "Monthly savings",
+            "createdAt": "2024-03-10T11:15:00Z",
+            "balanceAfter": 3000.00
+        },
+        {
+            "id": "txn-6",
+            "userId": "usr-3",
+            "accountId": "acc-2",
+            "type": "WITHDRAWAL",
+            "amount": 500.00,
+            "category": "GENERAL",
+            "description": "Utility payment",
+            "createdAt": "2024-03-12T13:25:00Z",
+            "balanceAfter": 2500.00
+        }
+    ]
+}

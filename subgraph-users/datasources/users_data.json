@@ -1,0 +1,89 @@
+{
+    "users": [
+        {
+            "id": "usr-1",
+            "fullName": "John Doe",
+            "email": "john.doe@example.com",
+            "phoneNumber": "+1234567890",
+            "dateOfBirth": "1990-05-15",
+            "address": {
+                "street": "123 Main Street",
+                "city": "New York",
+                "state": "NY",
+                "postalCode": "10001",
+                "country": "USA"
+            },
+            "status": "ACTIVE",
+            "createdAt": "2024-01-01T10:00:00Z",
+            "lastLoginAt": "2024-03-14T08:30:00Z"
+        },
+        {
+            "id": "usr-2",
+            "fullName": "Jane Smith",
+            "email": "jane.smith@example.com",
+            "phoneNumber": "+1234567891",
+            "dateOfBirth": "1988-08-22",
+            "address": {
+                "street": "456 Oak Avenue",
+                "city": "Los Angeles",
+                "state": "CA",
+                "postalCode": "90001",
+                "country": "USA"
+            },
+            "status": "ACTIVE",
+            "createdAt": "2024-01-15T14:30:00Z",
+            "lastLoginAt": "2024-03-13T16:45:00Z"
+        },
+        {
+            "id": "usr-3",
+            "fullName": "Alice Johnson",
+            "email": "alice.johnson@example.com",
+            "phoneNumber": "+1234567892",
+            "dateOfBirth": "1995-03-10",
+            "address": {
+                "street": "789 Pine Road",
+                "city": "Chicago",
+                "state": "IL",
+                "postalCode": "60601",
+                "country": "USA"
+            },
+            "status": "PENDING_VERIFICATION",
+            "createdAt": "2024-03-01T09:15:00Z",
+            "lastLoginAt": null
+        },
+        {
+            "id": "usr-4",
+            "fullName": "Bob Wilson",
+            "email": "bob.wilson@example.com",
+            "phoneNumber": "+1234567893",
+            "dateOfBirth": "1985-11-30",
+            "address": {
+                "street": "321 Elm Street",
+                "city": "Houston",
+                "state": "TX",
+                "postalCode": "77001",
+                "country": "USA"
+            },
+            "status": "INACTIVE",
+            "createdAt": "2024-02-01T11:20:00Z",
+            "lastLoginAt": "2024-02-15T13:10:00Z"
+        },
+        {
+            "id": "usr-5",
+            "fullName": "Carol Brown",
+            "email": "carol.brown@example.com",
+            "phoneNumber": "+1234567894",
+            "dateOfBirth": "1992-07-18",
+            "address": {
+                "street": "654 Maple Drive",
+                "city": "Miami",
+                "state": "FL",
+                "postalCode": "33101",
+                "country": "USA"
+            },
+            "status": "SUSPENDED",
+            "createdAt": "2024-01-20T16:00:00Z",
+            "lastLoginAt": "2024-03-01T10:25:00Z"
+        }
+    ]
+}

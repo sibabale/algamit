@@ -1,0 +1,81 @@
+extend schema
+  @link(url: "https://specs.apollo.dev/federation/v2.7",
+        import: ["@key"])
+
+type Query {
+  "Get all transactions for an account"
+  accountTransactions(accountId: ID!): [Transaction!]!
+  "Get a specific transaction by ID"
+  transaction(id: ID!): Transaction
+  "Get latest transactions across all accounts"
+  latestTransactions(limit: Int = 10): [Transaction!]!
+}
+
+type Transaction @key(fields: "id") {
+  id: ID!
+  "User who performed the transaction"
+  user: User!
+  "Type of transaction"
+  type: TransactionType!
+  "User ID who performed the transaction"
+  userId: ID!
+  "Amount involved in the transaction"
+  amount: Float!
+  "Account associated with this transaction"
+  account: Account!
+  "Account ID associated with this transaction"
+  accountId: ID!
+  "Category of the transaction (e.g., 'groceries', 'utilities', 'savings')"
+  category: String
+  "Date when transaction occurred"
+  createdAt: String!
+  "Description or note about the transaction"
+  description: String
+  "Balance after transaction"
+  balanceAfter: Float!
+}
+
+"Types of transactions"
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+}
+
+type Mutation {
+  createTransaction(input: TransactionInput!): TransactionResponse!
+}
+
+input TransactionInput {
+  "Account ID for the transaction"
+  accountId: ID!
+  "Type of transaction"
+  type: TransactionType!
+  "Amount for the transaction"
+  amount: Float!
+  "Optional category for the transaction"
+  category: String
+  "Optional description for the transaction"
+  description: String
+  "Withdrawal date (required for DEPOSIT transactions in fixed savings accounts)"
+  withdrawalDate: String
+}
+
+type TransactionResponse {
+  "Similar to HTTP status code, represents the status of the mutation"
+  code: Int!
+  "Indicates whether the mutation was successful"
+  success: Boolean!
+  "Human-readable message for the UI"
+  message: String!
+  "The created transaction"
+  transaction: Transaction
+}
+
+# Add reference types
+type User @key(fields: "id", resolvable: false) {
+  id: ID!
+}
+
+type Account @key(fields: "id", resolvable: false) {
+  id: ID!
+}

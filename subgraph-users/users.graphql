@@ -1,0 +1,99 @@
+extend schema
+  @link(url: "https://specs.apollo.dev/federation/v2.7",
+        import: ["@key"])
+
+type Query {
+  "Get user by ID"
+  user(id: ID!): User
+  "Get currently authenticated user"
+  me: User
+}
+
+type User @key(fields: "id") {
+  id: ID!
+  "User's full name"
+  fullName: String!
+  "User's email address"
+  email: String!
+  "User's phone number"
+  phoneNumber: String!
+  "User's date of birth"
+  dateOfBirth: String!
+  "User's address"
+  address: Address!
+  "User's account status"
+  status: UserStatus!
+  "Date user was created"
+  createdAt: String!
+  "Last login date"
+  lastLoginAt: String
+  "User's accounts"
+  accounts: [Account]
+}
+
+type Address {
+  "Street address"
+  street: String!
+  "City"
+  city: String!
+  "State or province"
+  state: String!
+  "Postal code"
+  postalCode: String!
+  "Country"
+  country: String!
+}
+
+"Possible status values for a user"
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  PENDING_VERIFICATION
+}
+
+type Mutation {
+  "Create a new user"
+  createUser(input: CreateUserInput!): UserResponse!
+  "Update user information"
+  updateUser(input: UpdateUserInput!): UserResponse!
+}
+
+input CreateUserInput {
+  fullName: String!
+  email: String!
+  phoneNumber: String!
+  dateOfBirth: String!
+  address: AddressInput!
+}
+
+input UpdateUserInput {
+  id: ID!
+  fullName: String
+  phoneNumber: String
+  address: AddressInput
+}
+
+input AddressInput {
+  street: String!
+  city: String!
+  state: String!
+  postalCode: String!
+  country: String!
+}
+
+type UserResponse {
+  "Similar to HTTP status code, represents the status of the mutation"
+  code: Int!
+  "Indicates whether the mutation was successful"
+  success: Boolean!
+  "Human-readable message for the UI"
+  message: String!
+  "User data"
+  user: User
+}
+
+# Add reference type for Account
+type Account @key(fields: "id", resolvable: false) {
+  id: ID!
+}
