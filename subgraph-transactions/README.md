@@ -11,6 +11,7 @@ This subgraph handles transaction-related operations in the Fixa federated Graph
 - Google Cloud Platform account
 - Cloud SQL PostgreSQL instance
 - Google Cloud CLI
+- Prisma ORM
 
 ### Installation
 
@@ -49,15 +50,9 @@ gcloud config set project YOUR_PROJECT_ID
 - Go to GCP Console → IAM & Admin → Service Accounts
 - Click "Create Service Account"
 - Name: `fixa-transactions-service`
-- Grant roles:  "Cloud SQL Client"
+- Grant roles: "Cloud SQL Client"
 - Click "Create Key" (JSON format)
 - Download and save as `service-account.json` in project root
-
-4. Get Cloud SQL Connection Info:
-
-- Go to GCP Console → SQL
-- Click on your instance
-- Note the "Instance connection name"
 
 ### Database Setup
 
@@ -74,29 +69,63 @@ chmod +x cloud-sql-proxy
 ./cloud-sql-proxy --credentials-file=./service-account.json INSTANCE_CONNECTION_NAME
 ```
 
-2. Seed initial data:
+2. Set up Prisma and database:
 
 ```bash
-npm run setup-db
+# Generate Prisma Client
+npm run prisma:generate
+
+# Push schema to database
+npm run prisma:push
+
+# Seed the database
+npm run prisma:seed
 ```
-
-
 
 ### Environment Setup
 
 Create a `.env` file:
 
 ```env
+
 DB_USER=your-database-user
 DB_NAME=your-database-name
 DB_PASSWORD=your-database-password
 INSTANCE_CONNECTION_NAME=your-project:region:instance-name
+DATABASE_URL="postgresql://DB_USER:DB_PASSWORD@localhost:5432/DB_NAME?host=/cloudsql/INSTANCE_CONNECTION_NAME"
+
+# For local development with Cloud SQL proxy
+DATABASE_URL="postgresql://DB_USER:DB_PASSWORD@localhost:5432/DB_NAME"
+
 GOOGLE_APPLICATION_CREDENTIALS=./service-account.json
 ```
 
+### Database Schema
+
+The schema is managed by Prisma and defined in `prisma/schema.prisma`:
+
+```prisma
+model Transaction {
+  id            String         @id
+  userId        String
+  accountId     String
+  type          TransactionType
+  amount        Decimal        @db.Decimal(15, 2)
+  category      String?
+  description   String?
+  createdAt     DateTime       @default(now()) @db.Timestamptz
+  withdrawalDate DateTime?     @db.Timestamptz
+  balanceAfter  Decimal       @db.Decimal(15, 2)
+  updatedAt     DateTime      @default(now()) @updatedAt @db.Timestamptz
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+}
+```
+
 ### Running the Service
-
-
 
 1. Start the service:
 
@@ -156,12 +185,13 @@ subgraph-transactions/
 │   └── database.js         # Database configuration
 ├── datasources/
 │   └── TransactionsAPI.js  # Transactions data source implementation
-├── scripts/
-│   └── setup-db.js         # Database setup script
-├── schema.graphql          # GraphQL schema
-├── resolvers.js            # GraphQL resolvers
-├── index.js                # Server entry point
-└── .env                    # Environment variables
+├── prisma/
+│   ├── schema.prisma      # Prisma schema definition
+│   └── seed.js            # Database seeding script
+├── schema.graphql         # GraphQL schema
+├── resolvers.js           # GraphQL resolvers
+├── index.js               # Server entry point
+└── .env                   # Environment variables
 ```
 
 ## Common Issues
@@ -203,14 +233,4 @@ Each transaction maintains:
 - Current balance after transaction
 - Creation and update timestamps
 - Optional withdrawal date for scheduled transactions
-
-
-This README includes:
-1. All necessary setup steps
-2. Database schema specific to transactions
-3. Transaction-specific testing examples
-4. Common issues related to transactions
-5. Security considerations for financial data
-6. Transaction type documentation
-
 
