@@ -46,20 +46,20 @@ const resolvers = {
         },
     },
     User: {
-        fullName: (user) => user.full_name,
-        phoneNumber: (user) => user.phone_number,
-        dateOfBirth: (user) => user.date_of_birth,
-        lastLoginAt: (user) => user.last_login_at,
-        postalCode: (user) => user.postal_code,
+        fullName: (user) => user.fullName,
+        phoneNumber: (user) => user.phoneNumber,
+        dateOfBirth: (user) => user.dateOfBirth,
+        lastLoginAt: (user) => user.lastLoginAt,
+        postalCode: (user) => user.postalCode,
         address: (user) => ({
             street: user.street,
             city: user.city,
             state: user.state,
-            postalCode: user.postal_code,
+            postalCode: user.postalCode,
             country: user.country,
         }),
         createdAt: (user) => {
-            return new Date(user.created_at).toISOString()
+            return new Date(user.createdAt).toISOString()
         },
         accounts: async (user, _, { dataSources }) => {
             // Get all accounts and filter by ownerId
