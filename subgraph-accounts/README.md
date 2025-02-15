@@ -1,6 +1,3 @@
-
-
-
 # Accounts Subgraph
 
 This subgraph handles account-related operations in the Fixa federated GraphQL API.
@@ -14,6 +11,7 @@ This subgraph handles account-related operations in the Fixa federated GraphQL A
 - Google Cloud Platform account
 - Cloud SQL PostgreSQL instance
 - Google Cloud CLI
+- Prisma ORM
 
 ### Installation
 
@@ -77,10 +75,17 @@ chmod +x cloud-sql-proxy
 ./cloud-sql-proxy --credentials-file=./service-account.json INSTANCE_CONNECTION_NAME
 ```
 
-2. Seed initial data:
+2. Set up Prisma and database:
 
 ```bash
-npm run setup-db
+# Generate Prisma Client
+npm run prisma:generate
+
+# Push schema to database
+npm run prisma:push
+
+# Seed the database
+npm run prisma:seed
 ```
 
 ### Environment Setup
@@ -88,11 +93,49 @@ npm run setup-db
 Create a `.env` file:
 
 ```env
+
 DB_NAME=accounts
 DB_USER=your-database-user
 DB_PASSWORD=your-database-password
 INSTANCE_CONNECTION_NAME=your-project:region:instance-name
+# For Cloud SQL with Unix socket
+DATABASE_URL="postgresql://DB_USER:DB_PASSWORD@localhost:5432/DB_NAME?host=/cloudsql/INSTANCE_CONNECTION_NAME"
+
+# For local development with Cloud SQL proxy
+DATABASE_URL="postgresql://DB_USER:DB_PASSWORD@localhost:5432/DB_NAME"
+
 GOOGLE_APPLICATION_CREDENTIALS=./service-account.json
+```
+
+### Database Schema
+
+The schema is managed by Prisma and defined in `prisma/schema.prisma`:
+
+```prisma
+model Account {
+  id            String       @id @default(uuid())
+  accountNumber String       @unique @default(uuid())
+  accountType   AccountType  @default(SAVINGS)
+  balance       Decimal      @db.Decimal(15, 2) @default(0)
+  dateOpened    DateTime     @default(now()) @db.Date
+  status        AccountStatus @default(ACTIVE)
+  ownerId       String       @default("default-owner")
+  createdAt     DateTime     @default(now()) @db.Timestamptz
+  updatedAt     DateTime     @default(now()) @updatedAt @db.Timestamptz
+}
+
+enum AccountType {
+  SAVINGS
+  CURRENT
+  FIXED_DEPOSIT
+}
+
+enum AccountStatus {
+  ACTIVE
+  FROZEN
+  CLOSED
+  INACTIVE
+}
 ```
 
 ### Running the Service
@@ -149,10 +192,10 @@ subgraph-accounts/
 ├── config/
 │   └── database.js     # Database configuration
 ├── datasources/
-│   ├── AccountsApi.js  # Account data source implementation
-│   └── accounts_data.json # Sample account data
-├── scripts/
-│   └── setup-db.js     # Database setup and seeding
+│   └── AccountsApi.js  # Account data source implementation
+├── prisma/
+│   ├── schema.prisma   # Prisma schema definition
+│   └── seed.js         # Database seeding script
 ├── accounts.graphql    # GraphQL schema
 ├── resolvers.js        # GraphQL resolvers
 ├── index.js            # Server entry point

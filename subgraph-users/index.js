@@ -20,6 +20,7 @@ async function startApolloServer() {
 
     const server = new ApolloServer({
         schema: buildSubgraphSchema({ typeDefs, resolvers }),
+        introspection: true,
         plugins: [
             ApolloServerPluginInlineTrace(),
             {

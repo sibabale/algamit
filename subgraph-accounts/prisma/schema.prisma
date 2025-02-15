@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AccountType {
+  SAVINGS
+  CURRENT
+  FIXED_DEPOSIT
+}
+
+enum AccountStatus {
+  ACTIVE
+  FROZEN
+  CLOSED
+  INACTIVE
+}
+
+model Account {
+  id            String       @id @default(uuid())
+  accountNumber String       @unique @default(uuid())
+  accountType   AccountType  @default(SAVINGS)
+  balance       Decimal      @db.Decimal(15, 2) @default(0)
+  dateOpened    DateTime     @default(now()) @db.Date
+  status        AccountStatus @default(ACTIVE)
+  ownerId       String       @default("default-owner")
+  createdAt     DateTime     @default(now()) @db.Timestamptz
+  updatedAt     DateTime     @default(now()) @updatedAt @db.Timestamptz
+
+  @@map("accounts")
+} 

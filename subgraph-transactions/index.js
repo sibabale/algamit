@@ -16,9 +16,10 @@ const TransactionsAPI = require('./datasources/TransactionsApi');
 async function startApolloServer() {
     // Initialize database connection
     await database.connect();
-
+    
     const server = new ApolloServer({
         schema: buildSubgraphSchema({ typeDefs, resolvers }),
+        introspection: true,
         plugins: [
             ApolloServerPluginInlineTrace(),
             {
