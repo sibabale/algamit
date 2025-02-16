@@ -33,9 +33,9 @@ class Database {
         // Test the connection
         try {
             await this.pool.query('SELECT NOW()')
-            console.log('Users database connection established')
+            console.log('🗄️ ✅ Users database connection established')
         } catch (error) {
-            console.error('Users database connection failed:', error)
+            console.error('🗄️ ❌ Users database connection failed:', error)
             throw error
         }
 

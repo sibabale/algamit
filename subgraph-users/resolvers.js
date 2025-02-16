@@ -1,3 +1,6 @@
+const { integrateWithUserCreation } = require('./kafka/producers/user.create')
+const UsersAPI = require('./datasources/UsersApi')
+
 const resolvers = {
     Query: {
         user: (_, { id }, { dataSources }) => {
@@ -72,5 +75,9 @@ const resolvers = {
         },
     },
 }
+
+// Initialize and integrate with Kafka
+const usersAPI = new UsersAPI()
+integrateWithUserCreation(usersAPI)
 
 module.exports = resolvers

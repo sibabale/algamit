@@ -12,6 +12,7 @@ const gql = require('graphql-tag');
 const typeDefs = gql(readFileSync('./accounts.graphql', { encoding: 'utf-8' }));
 const resolvers = require('./resolvers');
 const AccountsAPI = require('./datasources/AccountsApi');
+const { handleUserCreated } = require('./kafka/consumers/users/user.created');
 
 async function startApolloServer() {
     // Initialize database connection
@@ -51,5 +52,13 @@ async function startApolloServer() {
         console.error(err);
     }
 }
+
+const accountsAPI = new AccountsAPI();
+
+// Start the consumer
+handleUserCreated(accountsAPI).catch(error => {
+    console.error('Failed to start user.created consumer:', error);
+    process.exit(1);
+});
 
 startApolloServer();

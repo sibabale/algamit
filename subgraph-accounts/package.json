@@ -22,9 +22,11 @@
     "@apollo/subgraph": "^2.9.3",
     "@google-cloud/cloud-sql-connector": "^1.6.0",
     "@prisma/client": "^6.3.1",
+    "avsc": "^5.7.7",
     "dotenv": "^16.4.7",
     "graphql": "^16.8.1",
     "graphql-tag": "^2.12.6",
+    "kafkajs": "^2.2.4",
     "nodemon": "^3.1.7",
     "pg": "^8.13.3"
   },
