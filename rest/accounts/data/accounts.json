@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "accountNumber": "1234567890",
+    "balance": 1000,
+    "owner": "John Doe"
+  },
+  {
+    "id": 2,
+    "accountNumber": "2345678901",
+    "balance": 2000,
+    "owner": "Jane Doe"
+  },
+  {
+    "id": 3,
+    "accountNumber": "3456789012",
+    "balance": 3000,
+    "owner": "Alice Smith"
+  },
+  {
+    "id": 4,
+    "accountNumber": "4567890123",
+    "balance": 4000,
+    "owner": "Bob Johnson"
+  },
+  {
+    "id": 5,
+    "accountNumber": "5678901234",
+    "balance": 5000,
+    "owner": "Charlie Brown"
+  },
+  {
+    "id": 6,
+    "accountNumber": "6789012345",
+    "balance": 6000,
+    "owner": "David Lee"
+  },
+  {
+    "id": 7,
+    "accountNumber": "7890123456",
+    "balance": 7000,
+    "owner": "Emily Chen"
+  },
+  {
+    "id": 8,
+    "accountNumber": "8901234567",
+    "balance": 8000,
+    "owner": "Frank Martin"
+  },
+  {
+    "id": 9,
+    "accountNumber": "9012345678",
+    "balance": 9000,
+    "owner": "George Harris"
+  },
+  {
+    "id": 10,
+    "accountNumber": "0123456789",
+    "balance": 10000,
+    "owner": "Helen Taylor"
+  }
+]

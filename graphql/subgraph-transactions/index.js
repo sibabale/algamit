@@ -10,8 +10,8 @@ const { readFileSync } = require('fs');
 const { gql } = require('graphql-tag');
 
 const typeDefs = gql(readFileSync('./transactions.graphql', { encoding: 'utf-8' }));
-const resolvers = require('./resolvers');
-const TransactionsAPI = require('./datasources/TransactionsApi');
+const resolvers = require('./resolvers.js');
+const TransactionsAPI = require('./datasources/TransactionsApi.js');
 
 async function startApolloServer() {
     // Initialize database connection
@@ -57,12 +57,12 @@ startApolloServer();
 // Handle shutdown gracefully
 process.on('SIGINT', async () => {
     console.log('Received SIGINT. Performing graceful shutdown...');
-    await require('./config/database').disconnect();
+    await require('./config/database.js').disconnect();
     process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
     console.log('Received SIGTERM. Performing graceful shutdown...');
-    await require('./config/database').disconnect();
+    await require('./config/database.js').disconnect();
     process.exit(0);
 });
