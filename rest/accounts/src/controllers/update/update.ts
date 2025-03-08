@@ -1,62 +1,75 @@
-import { Request, Response } from 'express';
-import accounts from '../../data/accounts.json';
-import { isValidAuthHeader } from '../../utils'; 
+import { Request, Response } from 'express'
+import { PrismaClient } from '@prisma/client'
+import { isValidAuthHeader } from '../../utils'
 
-export const updateAccountOwner = (req: Request, res: Response) => {
+export const updateAccountOwner = async (req: Request, res: Response) => {
+    const prisma = new PrismaClient()
     try {
-        const authHeader = req.headers.authorization;
-        
+        const authHeader = req.headers.authorization
+
         if (!authHeader) {
             return res.status(401).json({
                 success: false,
-                error: 'Unauthorized: No token provided'
-            });
+                error: 'Unauthorized: No token provided',
+            })
         }
 
         if (!isValidAuthHeader(authHeader)) {
             return res.status(403).json({
                 success: false,
-                error: 'Forbidden: Invalid token'
-            });
+                error: 'Forbidden: Invalid token',
+            })
         }
 
-        const id = parseInt(req.params.id);
-        const { owner } = req.body;
+        const accountNumber = req.params.accountNumber
+        const { newOwnerId } = req.body
 
-        if (!owner) {
+        if (!newOwnerId) {
             return res.status(400).json({
                 success: false,
-                error: 'Please provide a new owner name'
-            });
+                error: 'Please provide a new owner name',
+            })
         }
 
-        const accountIndex = accounts.findIndex(acc => acc.id === id);
+        const account = await prisma.account.findUnique({
+            where: { accountNumber },
+        })
 
-        if (accountIndex === -1) {
+        if (!account) {
             return res.status(404).json({
                 success: false,
-                error: 'Account not found'
-            });
+                error: 'Account not found',
+            })
         }
 
-        if (accounts[accountIndex].owner === owner) {
+        console.log(account)
+        console.log(newOwnerId)
+
+        if (account.ownerId === newOwnerId) {
             return res.status(400).json({
                 success: false,
-                error: 'The new owner name must be different from the current owner name'
-            });
+                error: 'The new owner name must be different from the current owner name',
+            })
         }
 
-        accounts[accountIndex].owner = owner;
+        account.ownerId = newOwnerId
+
+        await prisma.account.update({
+            where: { accountNumber },
+            data: account,
+        })
 
         res.status(200).json({
             success: true,
             message: 'Account owner updated successfully',
-            data: accounts[accountIndex]
-        });
+            data: account,
+        })
     } catch (error) {
         res.status(500).json({
             success: false,
-            error: 'Server Error'
-        });
+            error: 'Server Error',
+        })
+    } finally {
+        await prisma.$disconnect()
     }
-};
+}

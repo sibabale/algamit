@@ -1,57 +1,72 @@
-import { Request, Response } from 'express';
-import accounts from '../../data/accounts.json';
-import { BankAccount, BankAccountStatus } from '../../types';
-import { v4 as uuidv4 } from 'uuid';
-import { isValidAuthHeader } from '../../utils/index';
+import { Request, Response } from 'express'
+import { PrismaClient, AccountType } from '@prisma/client'
+import { validate as uuidValidate } from 'uuid'
 
-export const createAccount = (req: Request, res: Response) => {
+import { NewAccount } from '../../types'
+import { isValidAuthHeader } from '../../utils/index'
+
+const prisma = new PrismaClient()
+
+export const createAccount = async (req: Request, res: Response) => {
     try {
-        const authHeader = req.headers.authorization;
-        
+        const authHeader = req.headers.authorization
+
         if (!authHeader) {
             return res.status(401).json({
                 success: false,
-                error: 'Unauthorized: No token provided'
-            });
+                error: 'Unauthorized: No token provided',
+            })
         }
 
         if (!isValidAuthHeader(authHeader)) {
             return res.status(403).json({
                 success: false,
-                error: 'Forbidden: Invalid token'
-            });
+                error: 'Forbidden: Invalid token',
+            })
         }
 
-        const { owner } = req.body;
+        const { ownerId, accountType = 'SAVINGS' } = req.body as NewAccount
 
-        if (!owner) {
+        if (!ownerId || !uuidValidate(ownerId)) {
             return res.status(400).json({
                 success: false,
-                error: 'Please provide owner'
-            });
+                error: 'Please provide a valid owner ID (UUID format)',
+            })
         }
 
-        function generateAccountNumber(): number {
-            const uuid = uuidv4().replace(/-/g, '');
-            return parseInt(uuid.substring(0, 10), 16);
+        const existingAccount = await prisma.account.findFirst({
+            where: {
+                ownerId,
+                accountType,
+                status: 'ACTIVE',
+            },
+        })
+
+        if (existingAccount) {
+            return res.status(400).json({
+                success: false,
+                error: `User already has an active ${accountType} account`,
+            })
         }
 
-        const newAccount: BankAccount = {
-            id: accounts.length > 0 ? Math.max(...accounts.map(acc => acc.id)) + 1 : 1,
-            accountNumber: generateAccountNumber(),
-            owner,
-            balance: 0,
-            status: 'ACTIVE' as BankAccountStatus
-        };
+        const newAccount = await prisma.account.create({
+            data: {
+                ownerId,
+                accountType: accountType as AccountType,
+            },
+        })
 
         res.status(201).json({
             success: true,
-            data: newAccount
-        });
+            data: newAccount,
+        })
     } catch (error) {
+        console.error('Create account error:', error)
         res.status(500).json({
             success: false,
-            error: 'Server Error'
-        });
+            error: 'Server Error',
+        })
+    } finally {
+        await prisma.$disconnect()
     }
-}; 
+}
