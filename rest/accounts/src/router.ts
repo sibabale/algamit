@@ -9,7 +9,7 @@ const router = Router();
 
 router.post('/accounts', apiRateLimiter, createAccount);
 router.get('/accounts', apiRateLimiter, getAllAccounts);
-router.get('/accounts/:id', apiRateLimiter, getAccountById);
+router.get('/accounts/:accountNumber', apiRateLimiter, getAccountById);
 router.delete('/accounts/:id', apiRateLimiter, closeAccount);
 router.put('/accounts/:id', apiRateLimiter, updateAccountOwner);
 

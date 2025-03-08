@@ -52,8 +52,8 @@ export const getAccountById = (req: Request, res: Response) => {
             });
         }
 
-        const id = parseInt(req.params.id);
-        const account = accounts.find(acc => acc.id === id);
+        const accountNumber = parseInt(req.params.accountNumber);
+        const account = accounts.find(acc => acc.accountNumber === accountNumber);
 
         if (!account) {
             return res.status(404).json({
