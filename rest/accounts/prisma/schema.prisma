@@ -12,10 +12,36 @@ datasource db {
 
 model User {
   id        String   @id @default(uuid())
-  email     String   @unique
   name      String?
+  email     String   @unique
+  active    Boolean  @default(true)
   password  String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  active    Boolean  @default(true)
+} 
+
+enum AccountType {
+  SAVINGS
+  CURRENT
+  FIXED_DEPOSIT
+}
+
+enum AccountStatus {
+  ACTIVE
+  FROZEN
+  CLOSED
+  INACTIVE
+}
+
+model Account {
+  id            String       @id @default(uuid())
+  status        AccountStatus @default(ACTIVE)
+  balance       Decimal      @db.Decimal(15, 2) @default(0)
+  ownerId       String       @default("default-owner")
+  createdAt     DateTime     @default(now()) @db.Timestamptz
+  updatedAt     DateTime     @default(now()) @updatedAt @db.Timestamptz
+  accountType   AccountType  @default(SAVINGS)
+  dateOpened    DateTime     @default(now()) @db.Date
+  accountNumber String       @unique @default(uuid())
+  @@map("accounts")
 } 
