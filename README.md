@@ -1,168 +1,127 @@
-# Fixa - Federated Banking API
+# Algamit - Modern Banking API
 
-Fixa is a modern banking API built using Apollo Federation, providing a unified GraphQL interface for banking operations. The system is composed of multiple microservices (subgraphs) that handle different aspects of the banking system.
+![Algamit Logo](./assets/images/algamit.png)
 
-## Architecture Overview
 
-The application uses a federated GraphQL architecture with the following components:
+Algamit is a project that implements a modern banking API using two different architectural approaches:
+1. Apollo Federation (GraphQL)
+2. REST Microservices
 
-### Subgraphs
-- **Users** (`localhost:4003`): Manages user profiles and authentication
-- **Accounts** (`localhost:4001`): Handles bank account operations
-- **Transactions** (`localhost:4002`): Processes financial transactions
+This project serves as a practical comparison between these two popular architectural patterns in the context of a banking system.
 
-### Gateway
-Apollo Router serves as the gateway (`localhost:4000`), combining all subgraphs into a unified API.
+## Docs
+
+### [https://docs.algamit.com](https://docs.algamit.com)
+**NB:** The above documentation are for REST only and may contain unstable breaking changes .
+
+## Project Structure
+
+I'll help format the project structure in a cleaner, more readable way:
+
+
+```
+algamit/
+├── graphql/                 # Apollo Federation implementation
+│   ├── gateway/             # Apollo Router setup
+│   ├── accounts/            # Accounts subgraph
+│   ├── transactions/        # Transactions subgraph
+│   └── README.md            # GraphQL implementation details
+│
+├── rest/                    # REST implementation
+│   ├── gateway/             # API Gateway
+│   ├── accounts/            # Accounts service
+│   ├── transactions/        # Transactions service
+│   └── README.md            # REST implementation details
+│
+└── assets/                  # Shared assets
+    └── images/              # Project images and logos
+```
+
+
+
+
+## Core Features
+
+Both implementations provide the same core banking features:
+- Account management (creation, updates, balance checks)
+- Transaction processing (deposits, withdrawals)
+
+## Choose Your Implementation
+
+### Apollo Federation (GraphQL)
+- **[GraphQL Implementation](./graphql/README.md)**
+- Features federated GraphQL architecture
+- Uses Apollo Router as gateway
+- Provides a unified GraphQL schema
+- Better for complex, nested queries
+
+### REST Microservices
+- **[REST Implementation](./rest/README.md)**
+- Traditional microservices architecture
+- Uses Express Gateway
+- Standard REST endpoints
+- Familiar HTTP methods and status codes
+
+## Common Technical Stack
+
+Both implementations share:
+- Node.js runtime
+- PostgreSQL database
+- TypeScript
+- Docker support
+- Google Cloud Platform ready
 
 ## Prerequisites
 
 - Node.js (>=14.0.0 <=20)
-- npm (>=6.0.0)
-- Google Cloud Platform account
-- Cloud SQL PostgreSQL instance
-- Google Cloud CLI
-- Apollo Router
+- npm or yarn
+- Docker (optional)
+- Google Cloud Platform account (optional)
+- PostgreSQL
 
-## Quick Start
+## Getting Started
 
-1. Clone the repository:
+Choose your preferred implementation:
+
+1. For GraphQL Federation:
 ```bash
-git clone https://github.com/your-username/fixa.git
-cd fixa
+cd graphql
+# Follow instructions in graphql/README.md
 ```
 
-2. Set up each subgraph:
+2. For REST Microservices:
 ```bash
-# Install dependencies for all subgraphs
-cd subgraph-users && npm install
-cd ../subgraph-accounts && npm install
-cd ../subgraph-transactions && npm install
+cd rest
+# Follow instructions in rest/README.md
 ```
 
-3. Set up the Apollo Router:
-```bash
-# Download router binary (Mac Apple Silicon)
-curl -sSL https://router.apollo.dev/download/nix/latest | sh
+## Security Considerations
 
-# Make executable
-chmod +x router
-```
+Both implementations follow security best practices:
+- Environment-based configuration
+- API authentication and authorization
+- Input validation
+- Transaction integrity
+- Rate limiting
 
-4. Create `.env` files in each subgraph directory using their respective `.env.example` templates.
+## Contributing
 
-5. Start the services:
-```bash
-# Start subgraphs (in separate terminals)
-cd subgraph-users && npm start
-cd subgraph-accounts && npm start
-cd subgraph-transactions && npm start
-
-# Start the router
-./router
-```
-
-## Detailed Setup
-
-Each subgraph has its own detailed setup instructions:
-- [Users Subgraph](./subgraph-users/README.md)
-- [Accounts Subgraph](./subgraph-accounts/README.md)
-- [Transactions Subgraph](./subgraph-transactions/README.md)
-
-## Database Schema
-
-### Users
-```sql
-CREATE SCHEMA users;
-CREATE TABLE users.users (
-    id VARCHAR(50) PRIMARY KEY,
-    full_name VARCHAR(100) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    phone_number VARCHAR(20),
-    date_of_birth DATE,
-    status VARCHAR(20) NOT NULL,
-    created_at TIMESTAMP NOT NULL,
-    last_login_at TIMESTAMP,
-    street VARCHAR(255),
-    city VARCHAR(100),
-    state VARCHAR(50),
-    postal_code VARCHAR(20),
-    country VARCHAR(100)
-);
-```
-
-### Accounts
-```sql
-CREATE TYPE account_type AS ENUM ('SAVINGS', 'CURRENT', 'FIXED_DEPOSIT');
-CREATE TYPE account_status AS ENUM ('ACTIVE', 'FROZEN', 'CLOSED', 'INACTIVE');
-
-CREATE TABLE accounts (
-    id VARCHAR(50) PRIMARY KEY,
-    account_number VARCHAR(50) UNIQUE NOT NULL,
-    account_type account_type NOT NULL,
-    balance DECIMAL(15,2) NOT NULL DEFAULT 0.00,
-    date_opened DATE NOT NULL DEFAULT CURRENT_DATE,
-    status account_status NOT NULL DEFAULT 'ACTIVE',
-    owner_id VARCHAR(50) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-### Transactions
-```sql
-CREATE TYPE transaction_type AS ENUM ('DEPOSIT', 'WITHDRAWAL');
-
-CREATE TABLE transactions (
-    id VARCHAR(50) PRIMARY KEY,
-    user_id VARCHAR(50) NOT NULL,
-    account_id VARCHAR(50) NOT NULL,
-    type transaction_type NOT NULL,
-    amount DECIMAL(15,2) NOT NULL,
-    category VARCHAR(50),
-    description TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    withdrawal_date TIMESTAMP WITH TIME ZONE,
-    balance_after DECIMAL(15,2) NOT NULL,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-```
-
-## API Examples
-
-### Query User with Accounts
-```graphql
-query GetUserWithAccounts($userId: ID!) {
-  user(id: $userId) {
-    id
-    fullName
-    email
-    accounts {
-      id
-      accountNumber
-      balance
-      transactions {
-        id
-        amount
-        type
-      }
-    }
-  }
-}
-```
-
-## Security Notes
-
-- Never commit `.env` or `service-account.json` files
-- Keep Cloud SQL Auth proxy running for local development
-- Regularly rotate database passwords and service account keys
-- Implement proper authorization for all operations
-- Ensure proper validation of financial transactions
+Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
 
 ## Resources
 
+### GraphQL Resources
 - [Apollo Federation Documentation](https://www.apollographql.com/docs/federation/)
 - [Apollo Router Documentation](https://www.apollographql.com/docs/router/)
-- [Google Cloud SQL Documentation](https://cloud.google.com/sql/docs)
+
+### REST Resources
+- [Express.js Documentation](https://expressjs.com/)
+- [REST API Best Practices](https://restfulapi.net/)
+
+### Common Resources
+- [Google Cloud Documentation](https://cloud.google.com/docs)
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 
+## License
 
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
