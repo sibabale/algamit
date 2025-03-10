@@ -1,9 +1,9 @@
+import { PrismaClient } from '@prisma/client'
 import { Request, Response } from 'express'
-import { PrismaClient, AccountType } from '@prisma/client'
 import { validate as uuidValidate } from 'uuid'
 
-import { NewAccount } from '../../types'
 import { isValidAuthHeader } from '../../utils/index'
+import { NewAccount, AccountType } from '../../types'
 
 const prisma = new PrismaClient()
 

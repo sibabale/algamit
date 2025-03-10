@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { isValidAuthHeader } from '../../utils'
 import { PrismaClient } from '@prisma/client'
+import { BankAccount } from '../../types'
 // Get all accounts
 export const getAllAccounts = async (req: Request, res: Response) => {
     try {
@@ -59,7 +60,7 @@ export const getAccountById = async (req: Request, res: Response) => {
 
         const accountNumber = req.params.accountNumber
         const account = accounts.find(
-            (acc) => acc.accountNumber === accountNumber
+            (acc: BankAccount) => acc.accountNumber === accountNumber
         )
 
         if (!account) {

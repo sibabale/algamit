@@ -1,6 +1,5 @@
-import { AccountType } from '@prisma/client'
-
-export type BankAccountStatus = 'ACTIVE' | 'CLOSED'
+export type AccountType = 'SAVINGS' | 'CURRENT' | 'FIXED_DEPOSIT'
+export type BankAccountStatus = 'ACTIVE' | 'FROZEN' | 'CLOSED' | 'INACTIVE'
 
 export type NewAccount = {
     ownerId: string

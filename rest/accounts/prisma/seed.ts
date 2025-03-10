@@ -1,12 +1,13 @@
 import { v4 as uuidv4 } from 'uuid'
-import { PrismaClient, AccountStatus, AccountType } from '@prisma/client'
+import { PrismaClient } from '@prisma/client'
+import { BankAccountStatus, AccountType } from '../src/types'
 
 const prisma = new PrismaClient()
 
 const accountData = [
     {
         id: uuidv4(),
-        status: 'ACTIVE' as AccountStatus,
+        status: 'ACTIVE' as BankAccountStatus,
         balance: 1000.0,
         ownerId: uuidv4(),
         accountType: 'SAVINGS' as AccountType,
@@ -15,7 +16,7 @@ const accountData = [
     },
     {
         id: '2b3c4d5e-6f7g-8h9i-0j1k-2l3m4n5o6p7q',
-        status: 'ACTIVE' as AccountStatus,
+        status: 'ACTIVE' as BankAccountStatus,
         balance: 2000.0,
         ownerId: uuidv4(),
         accountType: 'CURRENT' as AccountType,
@@ -24,7 +25,7 @@ const accountData = [
     },
     {
         id: '3c4d5e6f-7g8h-9i0j-1k2l-3m4n5o6p7q8r',
-        status: 'ACTIVE' as AccountStatus,
+        status: 'ACTIVE' as BankAccountStatus,
         balance: 3000.0,
         ownerId: uuidv4(),
         accountType: 'FIXED_DEPOSIT' as AccountType,
@@ -33,7 +34,7 @@ const accountData = [
     },
     {
         id: '4d5e6f7g-8h9i-0j1k-2l3m-4n5o6p7q8r9s',
-        status: 'CLOSED' as AccountStatus,
+        status: 'CLOSED' as BankAccountStatus,
         balance: 4000.0,
         ownerId: uuidv4(),
         accountType: 'SAVINGS' as AccountType,
@@ -42,7 +43,7 @@ const accountData = [
     },
     {
         id: '5e6f7g8h-9i0j-1k2l-3m4n-5o6p7q8r9s0t',
-        status: 'ACTIVE' as AccountStatus,
+        status: 'ACTIVE' as BankAccountStatus,
         balance: 5000.0,
         ownerId: uuidv4(),
         accountType: 'CURRENT' as AccountType,
