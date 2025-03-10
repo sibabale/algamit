@@ -10,12 +10,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  active    Boolean  @default(true)
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  TRANSFER
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum Currency {
+  USD
+  EUR
+  GBP
+}
+
+model Transaction {
+  id              String            @id @default(uuid())
+  type            TransactionType
+  status          TransactionStatus @default(PENDING)
+  amount          Decimal          @db.Decimal(15, 2)
+  createdAt       DateTime         @default(now()) @db.Timestamptz
+  updatedAt       DateTime         @updatedAt @db.Timestamptz
+  accountId       String
+  accountBalance  Decimal          @db.Decimal(15, 2)
+  accountCurrency Currency
+  
+  destination     Destination      @relation(fields: [destinationId], references: [id])
+  destinationId   String
+
+  @@map("transactions")
+}
+
+model Destination {
+  id            String        @id @default(uuid())
+  ownerId       String
+  accountNumber String
+  transactions  Transaction[]
+
+  @@map("destinations")
 } 

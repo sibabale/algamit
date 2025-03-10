@@ -1,40 +1,32 @@
-import { v4 as uuidv4 } from 'uuid'
-import { NewTransaction } from '../../types'
 import { Request, Response } from 'express'
+import { PrismaClient, TransactionType, Currency } from '@prisma/client'
 import { isValidAuthHeader } from '../../utils/index'
+
+const prisma = new PrismaClient()
 
 interface AccountResponse {
     success: boolean
     data: {
         id: string
         balance: number
+        ownerId: string
     }
 }
 
 export const createTransaction = async (req: Request, res: Response) => {
     try {
         const authHeader = req.headers.authorization
-
-        if (!authHeader) {
+        if (!authHeader || !isValidAuthHeader(authHeader)) {
             return res.status(401).json({
                 success: false,
-                error: 'Unauthorized: No token provided',
-            })
-        }
-
-        if (!isValidAuthHeader(authHeader)) {
-            return res.status(403).json({
-                success: false,
-                error: 'Forbidden: Invalid token',
+                error: 'Unauthorized: Invalid or no token provided',
             })
         }
 
         const { type, amount, accountNumber, accountCurrency, destination } =
             req.body
 
-        const supportedCurrencies = ['USD', 'EUR', 'GBP', 'ZAR']
-        const supportedTransactionTypes = ['DEPOSIT', 'WITHDRAWAL', 'TRANSFER']
-
+        // Validation checks
         if (
             !type ||
             !amount ||
@@ -45,35 +37,28 @@ export const createTransaction = async (req: Request, res: Response) => {
         ) {
             return res.status(400).json({
                 success: false,
-                error: 'Please provide a validtype, amount, accountNumber, accountCurrency, destination',
+                error: 'Please provide valid type, amount, accountNumber, accountCurrency, destination',
             })
         }
 
-        if (!supportedCurrencies.includes(accountCurrency)) {
-            return res.status(400).json({
-                success: false,
-                error: 'Unsupported currency',
-            })
-        }
-
-        if (!supportedTransactionTypes.includes(type)) {
+        // Validate transaction type and currency
+        if (!Object.values(TransactionType).includes(type)) {
             return res.status(400).json({
                 success: false,
                 error: 'Invalid transaction type',
             })
         }
 
-        const newTransaction: NewTransaction = {
-            id: uuidv4(),
-            type,
-            amount,
-            destination,
-            accountNumber,
-            accountCurrency,
+        if (!Object.values(Currency).includes(accountCurrency)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Unsupported currency',
+            })
         }
 
+        // Fetch account from accounts service
         const response = await fetch(
-            `http://localhost:3000/api/accounts/${accountNumber}`,
+            `${process.env.ACCOUNTS_SERVICE_URL}/${accountNumber}`,
             {
                 method: 'GET',
                 headers: {
@@ -85,76 +70,65 @@ export const createTransaction = async (req: Request, res: Response) => {
 
         const account = (await response.json()) as AccountResponse
 
-        if (account.success) {
-            const currentBalance = account.data.balance
-
-            const insufficientBalanceResponse = {
-                success: false,
-                error: 'Insufficient balance',
-            }
-
-            const successResponseData = {
-                id: uuidv4(),
-                status: 'COMPLETED',
-                amount: newTransaction.amount,
-                accountId: account.data.id,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-                accountCurrency: newTransaction.accountCurrency,
-                destination: {
-                    accountNumber: newTransaction.destination.accountNumber,
-                },
-            }
-
-            if (newTransaction.type === 'DEPOSIT') {
-                const newBalance = account.data.balance + newTransaction.amount
-
-                return res.status(201).json({
-                    success: true,
-                    data: {
-                        type: 'DEPOSIT',
-                        accountBalance: newBalance,
-                        ...successResponseData,
-                    },
-                })
-            } else if (newTransaction.type === 'WITHDRAWAL') {
-                if (newTransaction.amount > currentBalance) {
-                    return res.status(400).json(insufficientBalanceResponse)
-                }
-                const newBalance = account.data.balance - newTransaction.amount
-                return res.status(201).json({
-                    success: true,
-                    data: {
-                        type: 'WITHDRAWAL',
-                        accountBalance: newBalance,
-                        ...successResponseData,
-                    },
-                })
-            } else if (newTransaction.type === 'TRANSFER') {
-                if (currentBalance - newTransaction.amount < 0) {
-                    return res.status(400).json(insufficientBalanceResponse)
-                }
-                const newBalance = account.data.balance - newTransaction.amount
-                return res.status(201).json({
-                    success: true,
-                    data: {
-                        ...successResponseData,
-                        type: 'TRANSFER',
-                        accountBalance: newBalance,
-                    },
-                })
-            }
-        }
         if (!account.success) {
             return res.status(404).json({
                 success: false,
                 error: 'Account not found',
             })
         }
+
+        const currentBalance = account.data.balance
+        let newBalance = currentBalance
+
+        // Calculate new balance based on transaction type
+        switch (type) {
+            case 'DEPOSIT':
+                newBalance = currentBalance + amount
+                break
+            case 'WITHDRAWAL':
+            case 'TRANSFER':
+                if (amount > currentBalance) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Insufficient balance',
+                    })
+                }
+                newBalance = currentBalance - amount
+                break
+        }
+
+        console.log(account.data)
+
+        // Create transaction using Prisma
+        const transaction = await prisma.transaction.create({
+            data: {
+                type,
+                status: 'COMPLETED',
+                amount,
+                accountId: account.data.id,
+                accountBalance: newBalance,
+                accountCurrency,
+                destination: {
+                    create: {
+                        ownerId: destination.ownerId || account.data.ownerId,
+                        accountNumber: destination.accountNumber,
+                    },
+                },
+            },
+            include: {
+                destination: true,
+            },
+        })
+
+        return res.status(201).json({
+            success: true,
+            data: transaction,
+        })
     } catch (error) {
+        console.error('Error creating transaction:', error)
         res.status(500).json({
             success: false,
-            error: `Server Error: ${error}`,
+            error: 'Server Error',
         })
     }
 }

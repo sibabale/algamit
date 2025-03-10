@@ -1,30 +1,32 @@
+import { PrismaClient } from '@prisma/client'
 import { Request, Response } from 'express'
-import transactions from '../../data/transactions.json'
 import { isValidAuthHeader } from '../../utils'
 
-export const getAllTransactions = (req: Request, res: Response) => {
+const prisma = new PrismaClient()
+
+export const getAllTransactions = async (req: Request, res: Response) => {
     try {
         const authHeader = req.headers.authorization
 
-        if (!authHeader) {
+        if (!authHeader || !isValidAuthHeader(authHeader)) {
             return res.status(401).json({
                 success: false,
-                error: 'Unauthorized: No token provided',
+                error: 'Unauthorized: Invalid or no token provided',
             })
         }
 
-        if (!isValidAuthHeader(authHeader)) {
-            return res.status(403).json({
-                success: false,
-                error: 'Forbidden: Invalid token',
-            })
-        }
+        const transactions = await prisma.transaction.findMany({
+            include: {
+                destination: true,
+            },
+        })
 
         res.status(200).json({
             success: true,
             data: transactions,
         })
     } catch (error) {
+        console.error('Error fetching transactions:', error)
         res.status(500).json({
             success: false,
             error: 'Server Error',
@@ -33,26 +35,25 @@ export const getAllTransactions = (req: Request, res: Response) => {
 }
 
 // Get single transaction by ID
-export const getTransactionById = (req: Request, res: Response) => {
+export const getTransactionById = async (req: Request, res: Response) => {
     try {
         const authHeader = req.headers.authorization
 
-        if (!authHeader) {
+        if (!authHeader || !isValidAuthHeader(authHeader)) {
             return res.status(401).json({
                 success: false,
-                error: 'Unauthorized: No token provided',
+                error: 'Unauthorized: Invalid or no token provided',
             })
         }
 
-        if (!isValidAuthHeader(authHeader)) {
-            return res.status(403).json({
-                success: false,
-                error: 'Forbidden: Invalid token',
-            })
-        }
-
-        const id = req.params.id
-        const transaction = transactions.find((tnx) => tnx.id === id)
+        const transaction = await prisma.transaction.findUnique({
+            where: {
+                id: req.params.id,
+            },
+            include: {
+                destination: true,
+            },
+        })
 
         if (!transaction) {
             return res.status(404).json({
@@ -66,6 +67,7 @@ export const getTransactionById = (req: Request, res: Response) => {
             data: transaction,
         })
     } catch (error) {
+        console.error('Error fetching transaction:', error)
         res.status(500).json({
             success: false,
             error: 'Server Error',

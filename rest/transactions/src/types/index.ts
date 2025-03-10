@@ -12,7 +12,6 @@ export type BankTransaction = {
     accountCurrency: string
     destination: {
         ownerId: number
-        ownerName: string
         accountNumber: number
     }
 }
