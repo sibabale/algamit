@@ -7,9 +7,13 @@ export type NewAccount = {
 }
 
 export type BankAccount = {
-    id: number
-    owner: string
+    id: string
     status: BankAccountStatus
     balance: number
-    accountNumber: number
+    ownerId: string
+    updatedAt: Date
+    createdAt: Date
+    dateOpened: Date
+    accountType: AccountType
+    accountNumber: string
 }

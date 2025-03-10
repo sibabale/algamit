@@ -37,7 +37,7 @@ enum AccountStatus {
 model Account {
   id            String       @id @default(uuid())
   status        AccountStatus @default(ACTIVE)
-  balance       Decimal      @db.Decimal(15, 2) @default(0)
+  balance       Float        @default(0.0)
   ownerId       String       @default("default-owner")
   createdAt     DateTime     @default(now()) @db.Timestamptz
   updatedAt     DateTime     @default(now()) @updatedAt @db.Timestamptz
