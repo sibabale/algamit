@@ -1,0 +1,20 @@
+{
+    "name": "algamit-rest-services",
+    "version": "1.0.0",
+    "description": "Algamit REST microservices",
+    "license": "MIT",
+    "scripts": {
+      "logs": "pm2 logs",
+      "stop": "pm2 stop all",
+      "start": "pm2 start  ecosystem.config.js",
+      "monit": "pm2 monit",
+      "status": "pm2 list",
+      "delete": "pm2 delete all",
+      "restart": "pm2 restart all",
+      "gcp-deploy": "sh ./scripts/gcp-deploy.sh",
+      "docker-publish": "sh ./scripts/docker-deploy.sh"
+    },
+    "dependencies": {
+      "pm2": "^5.3.1"
+    }
+}

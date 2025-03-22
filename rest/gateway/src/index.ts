@@ -9,7 +9,7 @@ import { morganLogger, winstonLogger } from './utils/logger';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT || '3000', 10)
 
 // Middleware
 app.use(helmet());
@@ -55,6 +55,6 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   winstonLogger.info(`API Gateway is running on port ${PORT}`);
 }); 

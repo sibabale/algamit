@@ -125,3 +125,64 @@ Contributions are welcome! Please read our [Contributing Guide](CONTRIBUTING.md)
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Database Setup
+
+### Prerequisites
+- Supabase account or PostgreSQL database
+- Database connection strings (pooled and direct URLs)
+
+### Setting up Databases
+
+Each microservice (accounts, transactions) has its own database. Follow these steps for each service:
+
+1. **Set Environment Variables**
+```bash
+# In service/.env file
+DATABASE_URL="postgresql://user:password@host:6543/db?pgbouncer=true"
+DIRECT_URL="postgresql://user:password@host:5432/db"
+```
+
+2. **Initialize Database**
+```bash
+# Navigate to service directory
+cd accounts  # or cd transactions
+
+# Reset database (if needed)
+npx prisma migrate reset --force
+
+# Apply migrations
+npx prisma migrate deploy
+
+# Seed database
+npx prisma db seed
+```
+
+### Troubleshooting Database Setup
+
+If you encounter migration issues:
+
+1. **Reset Database State**
+```bash
+# Force reset database
+npx prisma db push --force-reset
+```
+
+2. **Create Baseline Migration**
+```bash
+# Create migration from current state
+npx prisma migrate diff \
+  --from-empty \
+  --to-schema-datamodel prisma/schema.prisma \
+  --script > baseline.sql
+
+# Apply baseline
+npx prisma migrate reset --force
+npx prisma migrate resolve --applied "init"
+```
+
+3. **Verify Database State**
+```bash
+# Check database status
+npx prisma db pull
+```

@@ -7,7 +7,7 @@ import router from './router'
 dotenv.config()
 
 const app = express()
-const port = process.env.PORT || 3200
+const PORT = parseInt(process.env.PORT || '3200', 10)
 
 // Middleware
 app.use(cors())
@@ -32,6 +32,6 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 })
 
 // Start server
-app.listen(port, () => {
-    console.log(`Server is running on port ${port}`)
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`)
 })

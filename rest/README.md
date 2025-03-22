@@ -9,7 +9,6 @@ Algamit is a modern banking API built using a microservices architecture, provid
 The application uses a REST-based microservices architecture with the following components:
 
 ### Microservices
-<!-- - **Users Service** (`localhost:3300`): Manages user profiles and authentication -->
 - **Accounts Service** (`localhost:3100`): Handles bank account operations
 - **Transactions Service** (`localhost:3200`): Processes financial transactions
 
@@ -19,44 +18,139 @@ An API Gateway serves as the entry point (`localhost:3000`), routing requests to
 ## Prerequisites
 
 - Node.js (>=14.0.0 <=20)
-- npm (>=6.0.0)
+- npm (>=6.0.0) or yarn
 - Google Cloud Platform account
 - Cloud SQL PostgreSQL instance
 - Google Cloud CLI
+- Docker
 
 ## Quick Start
 
 1. Clone the repository:
 ```bash
 git clone https://github.com/your-username/algamit.git
-cd algamit
+cd algamit/rest
 ```
 
 2. Set up each microservice:
 ```bash
 # Install dependencies for all services
-# cd users && yarn install
-cd ../accounts && yarn install
+cd accounts && yarn install
 cd ../transactions && yarn install
+cd ../gateway && yarn install
+cd ../ && yarn install  # Install root dependencies including PM2
 ```
 
 3. Create `.env` files in each service directory using their respective `.env.example` templates.
 
-4. Start the services:
+
+## Database Setup
+
+### Prerequisites
+- Supabase account or PostgreSQL database
+- Database connection strings (pooled and direct URLs)
+
+### Setting up Databases
+
+Each microservice (accounts, transactions) has its own database. Follow these steps for each service:
+
+1. **Set Environment Variables**
+```bash
+# In service/.env file
+DATABASE_URL="postgresql://user:password@host:6543/db?pgbouncer=true"
+DIRECT_URL="postgresql://user:password@host:5432/db"
+```
+
+2. **Initialize Database**
+```bash
+# Navigate to service directory
+cd accounts  # or cd transactions
+
+# Reset database (if needed)
+npx prisma migrate reset --force
+
+# Apply migrations
+npx prisma migrate deploy
+
+# Seed database
+npx prisma db seed
+```
+
+### Troubleshooting Database Setup
+
+If you encounter migration issues:
+
+1. **Reset Database State**
+```bash
+# Force reset database
+npx prisma db push --force-reset
+```
+
+2. **Create Baseline Migration**
+```bash
+# Create migration from current state
+npx prisma migrate diff \
+  --from-empty \
+  --to-schema-datamodel prisma/schema.prisma \
+  --script > baseline.sql
+
+# Apply baseline
+npx prisma migrate reset --force
+npx prisma migrate resolve --applied "init"
+```
+
+3. **Verify Database State**
+```bash
+# Check database status
+npx prisma db pull
+```
+
+[... rest of existing content ...]
+
+## Running Services
+
+### Development Mode (Individual Services)
 ```bash
 # Start services (in separate terminals)
-# cd users && yarn dev
 cd accounts && yarn dev
 cd transactions && yarn dev
-
-# Start the API gateway
 cd gateway && yarn dev
+```
+
+### Production Mode (Using PM2)
+From the root directory:
+```bash
+# Start all services
+yarn start
+
+# Other PM2 commands
+yarn stop      # Stop all services
+yarn restart   # Restart all services
+yarn status    # Check services status
+yarn logs      # View logs
+yarn monit     # Monitor services
+yarn delete    # Remove services from PM2
+```
+
+## Deployment
+
+### Docker Deployment
+Build and push Docker images to Google Container Registry:
+```bash
+# Authenticate with Google Cloud
+yarn docker:publish
+```
+
+### GCP Cloud Run Deployment
+Deploy services to Google Cloud Run:
+```bash
+# Deploy all services
+yarn deploy
 ```
 
 ## Detailed Setup
 
 Each service has its own detailed setup instructions:
-<!-- - [Users Service](./users/README.md) -->
 - [Accounts Service](./accounts/README.md)
 - [Transactions Service](./transactions/README.md)
 
@@ -87,13 +181,6 @@ Response:
 
 ## API Endpoints
 
-<!-- ### Users Service (Coming soon)
-- `GET /api/users` - List all users
-- `GET /api/users/{id}` - Get user by ID
-- `POST /api/users` - Create new user
-- `PUT /api/users/{id}` - Update user
-- `DELETE /api/users/{id}` - Delete user -->
-
 ### Accounts Service
 - `GET /api/accounts` - List all accounts
 - `GET /api/accounts/{id}` - Get account by ID
@@ -109,11 +196,25 @@ Response:
 
 ## Security Notes
 
-- Never commit `.env`  files
+- Never commit `.env` files
 - Keep Cloud SQL Auth proxy running for local development
 - Regularly rotate database passwords and service account keys
 - Implement proper authorization for all operations
 - Ensure proper validation of financial transactions
+
+## Deployment Notes
+
+### Local Deployment
+- PM2 manages all microservices locally
+- Each service runs in its own process
+- Services auto-restart on failure
+- Logs are centrally managed
+
+### Cloud Deployment
+- Services run as containers on Cloud Run
+- Each service scales independently
+- Region: africa-south1 (Johannesburg)
+- Public access enabled (configurable)
 
 ## Resources
 
@@ -121,5 +222,5 @@ Response:
 - [REST API Best Practices](https://restfulapi.net/)
 - [Google Cloud SQL Documentation](https://cloud.google.com/sql/docs)
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
-
-
+- [PM2 Documentation](https://pm2.keymetrics.io/)
+- [Google Cloud Run Documentation](https://cloud.google.com/run/docs)

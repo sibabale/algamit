@@ -72,12 +72,12 @@ export const getAccountById = async (req: Request, res: Response) => {
 
         res.status(200).json({
             success: true,
-            data: account,
+            data: { ...account, name: 'siba' },
         })
     } catch (error) {
         res.status(500).json({
             success: false,
-            error: 'Server Error',
+            error: 'Server Error' + error,
         })
     }
 }
