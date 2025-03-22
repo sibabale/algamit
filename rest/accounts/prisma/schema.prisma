@@ -41,8 +41,8 @@ model FixedDeposit {
   id           String   @id @default(uuid())
   name         String
   userId       String  
-  balance      Decimal  @default(0.0)
-  interestRate Decimal  @default(0.05)
+  balance      Decimal  @db.Decimal(20, 2)
+  interestRate Decimal  @db.Decimal(5, 2) @default(0.05)
   createdAt    DateTime @default(now())
   maturityDate DateTime
   status       String
