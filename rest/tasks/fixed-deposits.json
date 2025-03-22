@@ -1,0 +1,145 @@
+{
+    "fixedDepositFeatureDevelopment": [
+      {
+        "step": 1,
+        "title": "Update Database Schema & Migrations",
+        "description": "Add the necessary tables and fields to support the new Fixed Deposit model with monthly compound interest. Then run migrations.",
+        "details": {
+          "tasks": [
+            "Add 'FixedDeposit' model with fields: name, userId, balance, interestRate, createdAt, maturityDate, status.",
+            "Ensure a relation to 'User' model if not already present.",
+            "Set constraints: min. 1-year maturity, max. 80-year maturity.",
+            "Optional: Add a record/table to track monthly interest accrual or store it directly in the FD balance.",
+            "Perform database migration."
+          ],
+          "considerations": [
+            "Choose a decimal type for monetary values to avoid floating-point rounding issues.",
+            "Set default interestRate or store it in a config for easy updates."
+          ]
+        }
+      },
+      {
+        "step": 2,
+        "title": "Create Backend Service Layer",
+        "description": "Implement the core business logic for Fixed Deposit creation, updating balance, and preventing early withdrawal.",
+        "details": {
+          "tasks": [
+            "Write functions to handle creating new Fixed Deposits (validate maturity date & user balance).",
+            "Write functions to add additional funds to existing FDs prior to maturity.",
+            "Implement logic to block withdrawal or closure before maturity date.",
+            "Ensure the FD remains open and continues to accumulate interest if not withdrawn at maturity."
+          ],
+          "considerations": [
+            "Decide on how to pass parameters (via REST routes, GraphQL resolvers, etc.).",
+            "Include error handling for edge cases (e.g., insufficient balance, invalid maturity date)."
+          ]
+        }
+      },
+      {
+        "step": 3,
+        "title": "Implement Cron Job for Monthly Compound Interest",
+        "description": "Schedule a job to run monthly, calculating and applying compound interest to all active Fixed Deposits.",
+        "details": {
+          "tasks": [
+            "Set up a monthly cron/scheduled task (e.g., via Node cron, or a hosted scheduler).",
+            "Fetch all active Fixed Deposits.",
+            "Calculate monthly compound interest based on the FD's current balance and interest rate.",
+            "Update the FD's balance with the newly accrued interest."
+          ],
+          "considerations": [
+            "Ensure interest is applied exactly once per month (avoid duplicates if the job is retried).",
+            "Handle partial months for the first or last accrual if relevant, or define a standard approach (e.g., always on last day of month).",
+            "Maintain audit logs or transaction records to track interest posted."
+          ]
+        }
+      },
+      {
+        "step": 4,
+        "title": "Withdrawal & Maturity Handling",
+        "description": "Enable withdrawals only after FD maturity; block early withdrawals. If FD is not withdrawn at maturity, it keeps compounding.",
+        "details": {
+          "tasks": [
+            "Write a function to check if FD maturity date has passed (first second of maturity date).",
+            "If FD is mature, user can withdraw principal + accumulated interest.",
+            "On withdrawal, transition the FD to a closed state (or mark as 'withdrawn').",
+            "Prevent any additional deposits on the FD once the maturity date is reached."
+          ],
+          "considerations": [
+            "Decide if partial withdrawals are allowed or if the user must withdraw everything.",
+            "If the user never withdraws, the FD keeps accumulating monthly interest with no new deposits."
+          ]
+        }
+      },
+      {
+        "step": 5,
+        "title": "API Endpoints / Resolvers",
+        "description": "Expose the necessary endpoints to the front-end for creating deposits, adding funds, and withdrawing upon maturity.",
+        "details": {
+          "tasks": [
+            "POST /fixed-deposits: Create a new FD.",
+            "PATCH /fixed-deposits/:id/add-funds: Add funds to an existing FD.",
+            "PATCH /fixed-deposits/:id/withdraw: Withdraw from an FD once matured.",
+            "GET /fixed-deposits: List all FDs for a user (or admin to see all)."
+          ],
+          "considerations": [
+            "Validate that user is the owner for user-based requests.",
+            "Admins can have an endpoint to view or manage all FDs in the system if needed.",
+            "Handle edge cases: if FD is not matured, block withdrawal."
+          ]
+        }
+      },
+      {
+        "step": 6,
+        "title": "Frontend Integration",
+        "description": "Implement the UI/UX for creating, viewing, funding, and withdrawing from Fixed Deposits.",
+        "details": {
+          "tasks": [
+            "Form to create new FD (name, amount, maturity date).",
+            "Dashboard to display user’s active FDs, accrued interest, and maturity status.",
+            "Option to add more funds before maturity.",
+            "Withdrawal button that only appears when FD is mature."
+          ],
+          "considerations": [
+            "Provide helpful error messages (e.g., if user tries to withdraw prematurely).",
+            "Include disclaimers or confirmations about locking funds."
+          ]
+        }
+      },
+      {
+        "step": 7,
+        "title": "Testing & QA",
+        "description": "Write unit tests, integration tests, and end-to-end tests for the entire Fixed Deposit lifecycle.",
+        "details": {
+          "tasks": [
+            "Test FD creation with valid/invalid maturity dates.",
+            "Test monthly interest accrual logic (simulate cron job runs).",
+            "Test normal and edge cases for adding funds.",
+            "Test the withdraw logic at maturity (and blocking withdrawal before maturity).",
+            "Check race conditions, concurrency issues, or partial updates."
+          ],
+          "considerations": [
+            "Use a staging environment to validate the entire flow with test data.",
+            "Ensure all amounts and interest calculations are correct and consistent (decimal usage)."
+          ]
+        }
+      },
+      {
+        "step": 8,
+        "title": "Deployment & Monitoring",
+        "description": "Once tested, deploy the feature and ensure you have monitoring for scheduled jobs and transactions.",
+        "details": {
+          "tasks": [
+            "Deploy database migrations to production.",
+            "Implement real cron or scheduled tasks in production environment.",
+            "Set up logging for interest accrual, deposit creation, and withdrawal transactions.",
+            "Add any necessary alerts (e.g., if a cron job fails)."
+          ],
+          "considerations": [
+            "Review performance for large numbers of FDs.",
+            "Evaluate the viability of your interest rate or compounding approach over time."
+          ]
+        }
+      }
+    ]
+  }
+  
