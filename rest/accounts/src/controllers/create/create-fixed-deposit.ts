@@ -1,11 +1,10 @@
 import axios from 'axios'
 import dotenv from 'dotenv'
-import axiosRetry from 'axios-retry'
 import { PrismaClient } from '@prisma/client'
 import { Request, Response } from 'express'
 import { validate as uuidValidate } from 'uuid'
 
-import { isValidAuthHeader } from '../../utils/index'
+import { configureAxiosRetry, isValidAuthHeader } from '../../utils/index'
 
 dotenv.config()
 
@@ -16,18 +15,7 @@ const axiosUserServiceInstance = axios.create({
     timeout: 5000,
 })
 
-axiosRetry(axiosUserServiceInstance, {
-    retries: 3,
-    retryDelay: (retryCount) => {
-        return retryCount * 1000
-    },
-    retryCondition: (error) => {
-        return (
-            axiosRetry.isNetworkOrIdempotentRequestError(error) ||
-            (error.response ? error.response.status >= 500 : false)
-        )
-    },
-})
+configureAxiosRetry(axiosUserServiceInstance)
 
 export const createFixedDeposit = async (req: Request, res: Response) => {
     try {
@@ -115,7 +103,7 @@ export const createFixedDeposit = async (req: Request, res: Response) => {
         console.error('Create fixed deposit error:', error)
         res.status(500).json({
             success: false,
-            error: 'Server Error',
+            error: 'Server error: ' + error,
         })
     } finally {
         await prisma.$disconnect()

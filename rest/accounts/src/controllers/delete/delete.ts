@@ -49,7 +49,7 @@ export const closeAccount = async (req: Request, res: Response) => {
     } catch (error) {
         res.status(500).json({
             success: false,
-            error: 'Server Error',
+            error: 'Server error: ' + error,
         })
     } finally {
         await prisma.$disconnect()

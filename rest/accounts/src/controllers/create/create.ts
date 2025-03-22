@@ -64,7 +64,7 @@ export const createAccount = async (req: Request, res: Response) => {
         console.error('Create account error:', error)
         res.status(500).json({
             success: false,
-            error: 'Server Error',
+            error: 'Server error: ' + error,
         })
     } finally {
         await prisma.$disconnect()
