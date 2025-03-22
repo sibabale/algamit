@@ -7,10 +7,9 @@ export type BankTransaction = {
     type: BankTransactionType
     status: BankTransactionStatus
     amount: number
-    accountId: number
-    accountBalance: number
-    accountCurrency: string
-    destination: {
+    accountId?: number
+    currency: string
+    destination?: {
         ownerId: number
         accountNumber: number
     }
@@ -20,9 +19,9 @@ export type NewTransaction = {
     id: string
     type: BankTransactionType
     amount: number
-    accountNumber: number
-    accountCurrency: BankCurrency
-    destination: {
+    accountId?: number
+    currency: BankCurrency
+    destination?: {
         accountNumber: number
     }
 }

@@ -29,7 +29,7 @@ export const getAllTransactions = async (req: Request, res: Response) => {
         console.error('Error fetching transactions:', error)
         res.status(500).json({
             success: false,
-            error: 'Server Error',
+            error: 'Server error: ' + error,
         })
     }
 }
@@ -70,7 +70,7 @@ export const getTransactionById = async (req: Request, res: Response) => {
         console.error('Error fetching transaction:', error)
         res.status(500).json({
             success: false,
-            error: 'Server Error',
+            error: 'Server error: ' + error,
         })
     }
 }
