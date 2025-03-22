@@ -21,8 +21,7 @@ async function main() {
             status: 'PENDING' as TransactionStatus,
             amount: 1000,
             accountId: uuidv4(),
-            accountBalance: 1000,
-            accountCurrency: 'USD' as Currency,
+            currency: 'USD' as Currency,
             destination: {
                 create: {
                     ownerId: uuidv4(),
@@ -35,8 +34,7 @@ async function main() {
             status: 'COMPLETED' as TransactionStatus,
             amount: 500,
             accountId: uuidv4(),
-            accountBalance: 2500,
-            accountCurrency: 'EUR' as Currency,
+            currency: 'EUR' as Currency,
             destination: {
                 create: {
                     ownerId: uuidv4(),
@@ -49,8 +47,7 @@ async function main() {
             status: 'COMPLETED' as TransactionStatus,
             amount: 2000,
             accountId: uuidv4(),
-            accountBalance: 4000,
-            accountCurrency: 'GBP' as Currency,
+            currency: 'GBP' as Currency,
             destination: {
                 create: {
                     ownerId: uuidv4(),
@@ -63,8 +60,7 @@ async function main() {
             status: 'FAILED' as TransactionStatus,
             amount: 750,
             accountId: uuidv4(),
-            accountBalance: 1250,
-            accountCurrency: 'USD' as Currency,
+            currency: 'USD' as Currency,
             destination: {
                 create: {
                     ownerId: uuidv4(),
@@ -77,8 +73,7 @@ async function main() {
             status: 'COMPLETED' as TransactionStatus,
             amount: 3000,
             accountId: uuidv4(),
-            accountBalance: 5000,
-            accountCurrency: 'EUR' as Currency,
+            currency: 'EUR' as Currency,
             destination: {
                 create: {
                     ownerId: uuidv4(),

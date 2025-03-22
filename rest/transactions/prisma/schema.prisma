@@ -14,6 +14,7 @@ enum TransactionType {
   DEPOSIT
   WITHDRAWAL
   TRANSFER
+  FIXED_DEPOSIT
 }
 
 enum TransactionStatus {
@@ -26,6 +27,7 @@ enum Currency {
   USD
   EUR
   GBP
+  ZAR
 }
 
 model Transaction {
@@ -35,12 +37,11 @@ model Transaction {
   amount          Decimal          @db.Decimal(15, 2)
   createdAt       DateTime         @default(now()) @db.Timestamptz
   updatedAt       DateTime         @updatedAt @db.Timestamptz
-  accountId       String
-  accountBalance  Decimal          @db.Decimal(15, 2)
-  accountCurrency Currency
-  
-  destination     Destination      @relation(fields: [destinationId], references: [id])
-  destinationId   String
+  accountId       String?
+  currency        Currency
+
+  destination     Destination?     @relation(fields: [destinationId], references: [id])
+  destinationId   String?
 
   @@map("transactions")
 }
