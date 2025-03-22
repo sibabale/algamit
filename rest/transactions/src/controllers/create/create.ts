@@ -23,21 +23,13 @@ export const createTransaction = async (req: Request, res: Response) => {
             })
         }
 
-        const { type, amount, accountNumber, accountCurrency, destination } =
-            req.body
+        const { type, amount, currency, accountId } = req.body
 
         // Validation checks
-        if (
-            !type ||
-            !amount ||
-            amount <= 0 ||
-            !destination ||
-            !accountNumber ||
-            !accountCurrency
-        ) {
+        if (!type || !amount || amount <= 0 || !currency) {
             return res.status(400).json({
                 success: false,
-                error: 'Please provide valid type, amount, accountNumber, accountCurrency, destination',
+                error: 'Please provide valid type, amount, and currency',
             })
         }
 
@@ -49,81 +41,110 @@ export const createTransaction = async (req: Request, res: Response) => {
             })
         }
 
-        if (!Object.values(Currency).includes(accountCurrency)) {
+        if (!Object.values(Currency).includes(currency)) {
             return res.status(400).json({
                 success: false,
                 error: 'Unsupported currency',
             })
         }
 
-        // Fetch account from accounts service
-        const response = await fetch(
-            `${process.env.ACCOUNTS_SERVICE_URL}/${accountNumber}`,
-            {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: authHeader,
-                },
+        // Handle transactions that require accountId
+        if (type === 'TRANSFER') {
+            if (!accountId) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'accountId is required for transfer transactions',
+                })
             }
-        )
 
-        const account = (await response.json()) as AccountResponse
-
-        if (!account.success) {
-            return res.status(404).json({
-                success: false,
-                error: 'Account not found',
-            })
-        }
-
-        const currentBalance = account.data.balance
-        let newBalance = currentBalance
-
-        // Calculate new balance based on transaction type
-        switch (type) {
-            case 'DEPOSIT':
-                newBalance = currentBalance + amount
-                break
-            case 'WITHDRAWAL':
-            case 'TRANSFER':
-                if (amount > currentBalance) {
-                    return res.status(400).json({
-                        success: false,
-                        error: 'Insufficient balance',
-                    })
+            // Fetch account from accounts service
+            const response = await fetch(
+                `${process.env.ACCOUNTS_SERVICE_URL}/${accountId}`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: authHeader,
+                    },
                 }
-                newBalance = currentBalance - amount
-                break
-        }
+            )
 
-        console.log(account.data)
+            const account = (await response.json()) as AccountResponse
 
-        // Create transaction using Prisma
-        const transaction = await prisma.transaction.create({
-            data: {
+            if (!account.success) {
+                return res.status(404).json({
+                    success: false,
+                    error: 'Account not found',
+                })
+            }
+
+            const currentBalance = account.data.balance
+            let newBalance = currentBalance
+
+            // Calculate new balance based on transaction type
+            switch (type) {
+                case 'DEPOSIT':
+                case 'FIXED_DEPOSIT':
+                    newBalance = currentBalance + amount
+                    break
+                case 'WITHDRAWAL':
+                case 'TRANSFER':
+                    if (amount > currentBalance) {
+                        return res.status(400).json({
+                            success: false,
+                            error: 'Insufficient balance',
+                        })
+                    }
+                    newBalance = currentBalance - amount
+                    break
+            }
+
+            // Create transaction using Prisma
+            const transactionData: any = {
                 type,
                 status: 'COMPLETED',
                 amount,
                 accountId: account.data.id,
-                accountBalance: newBalance,
-                accountCurrency,
-                destination: {
-                    create: {
-                        ownerId: destination.ownerId || account.data.ownerId,
-                        accountNumber: destination.accountNumber,
-                    },
-                },
-            },
-            include: {
-                destination: true,
-            },
-        })
+                currency,
+            }
 
-        return res.status(201).json({
-            success: true,
-            data: transaction,
-        })
+            // Only include destination for transfer transactions
+            if (type === 'TRANSFER') {
+                transactionData.destination = {
+                    create: {
+                        ownerId: account.data.ownerId,
+                        accountNumber: req.body.destination.accountNumber,
+                    },
+                }
+            }
+
+            const transaction = await prisma.transaction.create({
+                data: transactionData,
+                include: {
+                    destination: true,
+                },
+            })
+
+            return res.status(201).json({
+                success: true,
+                data: transaction,
+            })
+        } else {
+            // Handle DEPOSIT and FIXED_DEPOSIT without accountId
+            const transaction = await prisma.transaction.create({
+                data: {
+                    type,
+                    status: 'COMPLETED',
+                    amount,
+                    currency,
+                },
+            })
+
+            return res.status(201).json({
+                success: true,
+                data: transaction,
+            })
+        }
     } catch (error) {
         console.error('Error creating transaction:', error)
         res.status(500).json({
