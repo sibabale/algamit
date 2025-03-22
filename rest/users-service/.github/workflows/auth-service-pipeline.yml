@@ -1,0 +1,51 @@
+name: Auth Service CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'backend/express-api/auth-service/**'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'backend/express-api/auth-service/**'
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend/express-api/auth-service
+
+    env:
+      DATABASE_URL: ${{ secrets.AUTH_DATABASE_URL }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      NODE_ENV: test
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'yarn'
+          cache-dependency-path: backend/express-api/auth-service/yarn.lock
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Lint code
+        run: yarn lint
+
+      - name: Run tests
+        run: yarn test
+
+      - name: Build application
+        run: yarn build
