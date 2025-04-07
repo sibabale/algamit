@@ -1,0 +1,103 @@
+// This is your unified Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ========== Accounts models ==========
+
+model User {
+  id        String   @id @default(uuid())
+  name      String?
+  email     String   @unique
+  active    Boolean  @default(true)
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum AccountType {
+  SAVINGS
+  CURRENT
+  FIXED_DEPOSIT
+}
+
+enum AccountStatus {
+  ACTIVE
+  FROZEN
+  CLOSED
+  INACTIVE
+}
+
+model Account {
+  id            String        @id @default(uuid())
+  status        AccountStatus @default(ACTIVE)
+  balance       Float         @default(0.0)
+  ownerId       String        @default("default-owner")
+  createdAt     DateTime      @default(now()) @db.Timestamptz
+  updatedAt     DateTime      @default(now()) @updatedAt @db.Timestamptz
+  accountType   AccountType   @default(SAVINGS)
+  dateOpened    DateTime      @default(now()) @db.Date
+  accountNumber String        @unique @default(uuid())
+  
+  // Relation to transactions
+  transactions  Transaction[]
+
+  @@map("accounts")
+}
+
+// ========== Transactions models ==========
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  TRANSFER
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum Currency {
+  USD
+  EUR
+  GBP
+}
+
+model Transaction {
+  id              String            @id @default(uuid())
+  type            TransactionType
+  status          TransactionStatus @default(PENDING)
+  amount          Decimal           @db.Decimal(15, 2)
+  createdAt       DateTime          @default(now()) @db.Timestamptz
+  updatedAt       DateTime          @updatedAt @db.Timestamptz
+  
+  // Account relation
+  account         Account           @relation(fields: [accountId], references: [id])
+  accountId       String
+  accountBalance  Decimal           @db.Decimal(15, 2)
+  accountCurrency Currency
+  
+  // Destination relation
+  destination     Destination       @relation(fields: [destinationId], references: [id])
+  destinationId   String
+
+  @@map("transactions")
+}
+
+model Destination {
+  id            String        @id @default(uuid())
+  ownerId       String
+  accountNumber String
+  transactions  Transaction[]
+
+  @@map("destinations")
+} 
